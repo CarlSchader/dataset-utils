@@ -26,8 +26,11 @@ fn main() {
             }
         } else {
             match imghdr::from_file(&curr) {
-                Ok(..) => (),
-                Err(..) => fs::remove_file(curr).unwrap(),
+                Ok(t) => match t {
+                    Some(_) => (),
+                    None => fs::remove_file(curr).unwrap(),
+                }
+                Err(e) => eprintln!("Error: {}", e),
             }
         }
     }
