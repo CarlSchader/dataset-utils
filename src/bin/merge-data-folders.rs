@@ -45,10 +45,16 @@ fn main() {
                         Some(ext) => format!("{}/{}{}{}.{}", class_output_dir, sample_name, SUFFIX, count, ext.to_str().unwrap()),
                         None => format!("{}/{}{}{}", class_output_dir, sample_name, SUFFIX, count),
                     };
-                    fs::copy(&sample_path, &new_sample_output_path).unwrap();
+                    match fs::copy(&sample_path, &new_sample_output_path) {
+                        Ok(_) => (),
+                        Err(e) => eprintln!("Error copying {} to {}: Message {}", sample_path.display(), new_sample_output_path, e),
+                    };
                     seen.insert(sample_output_path, count + 1);
                 } else {
-                    fs::copy(&sample_path, &sample_output_path).unwrap();
+                    match fs::copy(&sample_path, &sample_output_path) {
+                        Ok(_) => (),
+                        Err(e) => eprintln!("Error copying {} to {}: Message {}", sample_path.display(), sample_output_path, e),
+                    }
                     seen.insert(sample_output_path, 1);
                 }
             }
