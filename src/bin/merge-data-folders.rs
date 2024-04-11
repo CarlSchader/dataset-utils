@@ -29,7 +29,10 @@ fn main() {
             let class_output_dir = format!("{}/{}", output_dir, class_name);
             fs::create_dir_all(&class_output_dir).unwrap();
 
-            let samples = fs::read_dir(class_dir.path()).unwrap();
+            let samples = match fs::read_dir(class_dir.path()) {
+                Ok(samples) => samples,
+                Err(e) => panic!("Error reading directory {}: Message {}", class_dir.path().display(), e),
+            };
             for sample in samples {
                 let sample_path = sample.unwrap().path();
                 let sample_name = sample_path.file_stem().unwrap().to_str().unwrap().to_string();
@@ -47,13 +50,13 @@ fn main() {
                     };
                     match fs::copy(&sample_path, &new_sample_output_path) {
                         Ok(_) => (),
-                        Err(e) => eprintln!("Error copying {} to {}: Message {}", sample_path.display(), new_sample_output_path, e),
+                        Err(e) => panic!("Error copying {} to {}: Message {}", sample_path.display(), new_sample_output_path, e),
                     };
                     seen.insert(sample_output_path, count + 1);
                 } else {
                     match fs::copy(&sample_path, &sample_output_path) {
                         Ok(_) => (),
-                        Err(e) => eprintln!("Error copying {} to {}: Message {}", sample_path.display(), sample_output_path, e),
+                        Err(e) => panic!("Error copying {} to {}: Message {}", sample_path.display(), sample_output_path, e),
                     }
                     seen.insert(sample_output_path, 1);
                 }
