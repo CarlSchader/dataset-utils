@@ -34,6 +34,7 @@ fn main() {
     let in_place: bool;
     let mut seen: HashMap<&String, u32> = HashMap::new();
     let mut files: Vec<String> = Vec::new();
+    let mut class_dirs: Vec<String> = Vec::new();
     
     if cli.dataset_directory {
         for dir_entry in fs::read_dir(&cli.input_dir).unwrap() {
@@ -41,6 +42,7 @@ fn main() {
             if dir_path.is_file() {
                 eprintln!("Error: Root directory should not contain files in DATASET_DIRECTORY mode");
             }
+            class_dirs.push(dir_path.to_str().unwrap().to_string());
 
             for entry in fs::read_dir(dir_path).unwrap() {
                 let file_path = entry.unwrap().path();
@@ -78,10 +80,12 @@ fn main() {
         },
     };
     
-    let train_dir:String = format!("{}/train", root);
+    let train_dir: String = format!("{}/train", root);
     let test_dir: String = format!("{}/test", root);
     fs::create_dir_all(&train_dir).unwrap();
     fs::create_dir_all(&test_dir).unwrap();
+
+    
 
     let val_dir: Option<String> = if cli.val.is_some() {
         fs::create_dir_all(&format!("{}/val", root)).unwrap();
@@ -89,6 +93,16 @@ fn main() {
     } else {
         None
     };
+
+    if cli.dataset_directory {
+        for class_dir in class_dirs {
+            fs::create_dir_all(&format!("{}/{}", &train_dir, class_dir)).unwrap();
+            fs::create_dir_all(&format!("{}/{}", &test_dir, class_dir)).unwrap();
+            if val_dir.is_some() {
+                fs::create_dir_all(&format!("{}/{}", val_dir.clone().unwrap(), class_dir)).unwrap();
+            }
+        }
+    }
 
     let test_size: u32;
     match cli.test {
